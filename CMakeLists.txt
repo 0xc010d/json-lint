@@ -15,4 +15,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 add_executable(json-lint main.cpp)
 target_link_libraries(json-lint JsonLint)
 
-#set(CMAKE_VERBOSE_MAKEFILE TRUE)
+enable_testing()
+add_subdirectory(tests)
+
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
