@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(JsonLint)
+
+add_subdirectory(lib/json11)
+include_directories(lib/json11)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+add_library(JsonLint Validator.cpp)
+target_link_libraries(JsonLint json11)
+include_directories(${PROJECT_SOURCE_DIR})
+
+add_executable(json-lint main.cpp)
+target_link_libraries(json-lint JsonLint)
+
+#set(CMAKE_VERBOSE_MAKEFILE TRUE)
