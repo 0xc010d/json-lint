@@ -412,11 +412,12 @@ bool ValidatorImpl::validate_type(const Json &json, const Json &type, const Json
   }
   typedef bool (Json::*TypeChecker)() const;
   static const std::map<std::string, TypeChecker> checkers{
-    {"number", &Json::is_number},
-    {"string", &Json::is_string},
-    {"null",   &Json::is_null},
-    {"array",  &Json::is_array},
-    {"object", &Json::is_object},
+    {"number",  &Json::is_number},
+    {"string",  &Json::is_string},
+    {"null",    &Json::is_null},
+    {"boolean", &Json::is_bool},
+    {"array",   &Json::is_array},
+    {"object",  &Json::is_object},
   };
   assert(checkers.find(typeString) != checkers.end());
   auto &checker = checkers.at(typeString);
