@@ -4,6 +4,8 @@
 #include <assert.h>
 #include "ValidatorImpl.h"
 
+using namespace json11;
+
 ValidatorImpl::ValidatorImpl() : ValidatorImpl(Json::object{}) { }
 
 ValidatorImpl::ValidatorImpl(const Json &schema) : m_validators{
