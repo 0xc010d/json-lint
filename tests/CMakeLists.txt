@@ -4,7 +4,7 @@ include_directories(${gtest_SOURCE_DIR}/include)
 include_directories(${json11_SOURCE_DIR})
 include_directories(${JsonLint_SOURCE_DIR})
 
-set(SRC main.cpp ValidatorTests.cpp)
+set(SRC main.cpp GlobalTests.cpp RefTests.cpp AdditionalItemsTests.cpp AdditionalPropertiesTests.cpp)
 
 add_executable(validator-tests ${SRC})
 target_link_libraries(validator-tests gtest_main JsonLint)
