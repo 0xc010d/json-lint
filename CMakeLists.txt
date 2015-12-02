@@ -8,7 +8,7 @@ include_directories(lib/json11)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-add_library(JsonLint Validator.cpp)
+add_library(JsonLint Validator.cpp ValidatorImpl.cpp)
 target_link_libraries(JsonLint json11)
 include_directories(${PROJECT_SOURCE_DIR})
 
