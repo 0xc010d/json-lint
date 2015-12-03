@@ -2,6 +2,20 @@
 #include <ValidatorImpl.h>
 #include "_JsonHelper.h"
 
+TEST(AdditionalProperties, DisallowedNotAnObjectJson)
+{
+  ValidatorImpl v;
+  const std::string json = R"([])";
+  const std::string additionalProperties = R"(false)";
+  const std::string schema = R"(
+{
+  "additionalProperties": false,
+  "properties": {"p1": {}, "p2": {}, "p3": {}}
+}
+)";
+  ASSERT_EQ(v.validate_additionalProperties(_json_(json), _json_(additionalProperties), _json_(schema)), true);
+}
+
 TEST(AdditionalProperties, Object)
 {
   ValidatorImpl v;

@@ -2,6 +2,15 @@
 #include <ValidatorImpl.h>
 #include "_JsonHelper.h"
 
+TEST(AdditionalItems, DisallowedNotAnArrayJson)
+{
+  ValidatorImpl v;
+  const std::string json = R"({})";
+  const std::string additionalItems = R"(false)";
+  const std::string schema = R"({"additionalItems": false, "items": []})";
+  ASSERT_EQ(v.validate_additionalItems(_json_(json), _json_(additionalItems), _json_(schema)), true);
+}
+
 TEST(AdditionalItems, DisallowedNoItems)
 {
   ValidatorImpl v;

@@ -8,6 +8,6 @@ __attribute__((always_inline))
 json11::Json _json_(const std::string &string) {
   std::string error;
   auto json = json11::Json::parse(string, error);
-  assert(error.length() == 0);
+  assert(error.empty());
   return json;
 }
