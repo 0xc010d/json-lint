@@ -48,8 +48,8 @@ bool ValidatorImpl::validate(const Json &json, const Json &schema)
   assert(schema.is_object());
   for (auto &key : schema.object_items()) {
     if (m_validators.find(key.first) != m_validators.end()) {
-      auto &method = m_validators.at(key.first);
-      result = result & (this->*method)(json, key.second, schema);
+      auto &validatorFunction = m_validators.at(key.first);
+      result = result & (this->*validatorFunction)(json, key.second, schema);
     }
   }
   return result;
