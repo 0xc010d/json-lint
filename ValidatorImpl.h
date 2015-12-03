@@ -69,8 +69,5 @@ public:
   bool validate_uniqueItems(const json11::Json &, const json11::Json &, const json11::Json &);
 
 private:
-  typedef bool (ValidatorImpl::*ValidatorFunction)(const json11::Json &, const json11::Json &, const json11::Json &);
-
   const json11::Json m_schema;
-  const std::map<std::string, ValidatorFunction> m_validators;
 };

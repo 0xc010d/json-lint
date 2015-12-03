@@ -8,34 +8,7 @@ using namespace json11;
 
 ValidatorImpl::ValidatorImpl() : ValidatorImpl(Json::object{}) { }
 
-ValidatorImpl::ValidatorImpl(const Json &schema) : m_schema(schema), m_validators{
-  {"$ref",                 &ValidatorImpl::validate_$ref},
-  {"additionalItems",      &ValidatorImpl::validate_additionalItems},
-  {"additionalProperties", &ValidatorImpl::validate_additionalProperties},
-  {"allOf",                &ValidatorImpl::validate_allOf},
-  {"anyOf",                &ValidatorImpl::validate_anyOf},
-  {"dependencies",         &ValidatorImpl::validate_dependencies},
-  {"enum",                 &ValidatorImpl::validate_enum},
-  {"format",               &ValidatorImpl::validate_format},
-  {"items",                &ValidatorImpl::validate_items},
-  {"maxItems",             &ValidatorImpl::validate_maxItems},
-  {"maxLength",            &ValidatorImpl::validate_maxLength},
-  {"maxProperties",        &ValidatorImpl::validate_maxProperties},
-  {"maximum",              &ValidatorImpl::validate_maximum},
-  {"minItems",             &ValidatorImpl::validate_minItems},
-  {"minLength",            &ValidatorImpl::validate_minLength},
-  {"minProperties",        &ValidatorImpl::validate_minProperties},
-  {"minimum",              &ValidatorImpl::validate_minimum},
-  {"multipleOf",           &ValidatorImpl::validate_multipleOf},
-  {"not",                  &ValidatorImpl::validate_not},
-  {"oneOf",                &ValidatorImpl::validate_oneOf},
-  {"pattern",              &ValidatorImpl::validate_pattern},
-  {"patternProperties",    &ValidatorImpl::validate_patternProperties},
-  {"properties",           &ValidatorImpl::validate_properties},
-  {"required",             &ValidatorImpl::validate_required},
-  {"type",                 &ValidatorImpl::validate_type},
-  {"uniqueItems",          &ValidatorImpl::validate_uniqueItems},
-} { }
+ValidatorImpl::ValidatorImpl(const Json &schema) : m_schema(schema) { }
 
 bool ValidatorImpl::validate(const Json &json)
 {
@@ -44,12 +17,42 @@ bool ValidatorImpl::validate(const Json &json)
 
 bool ValidatorImpl::validate(const Json &json, const Json &schema)
 {
+  typedef bool (ValidatorImpl::*ValidatorFunction)(const json11::Json &, const json11::Json &, const json11::Json &);
+  static const std::map<std::string, ValidatorFunction> validatorFunctions{
+    {"$ref",                 &ValidatorImpl::validate_$ref},
+    {"additionalItems",      &ValidatorImpl::validate_additionalItems},
+    {"additionalProperties", &ValidatorImpl::validate_additionalProperties},
+    {"allOf",                &ValidatorImpl::validate_allOf},
+    {"anyOf",                &ValidatorImpl::validate_anyOf},
+    {"dependencies",         &ValidatorImpl::validate_dependencies},
+    {"enum",                 &ValidatorImpl::validate_enum},
+    {"format",               &ValidatorImpl::validate_format},
+    {"items",                &ValidatorImpl::validate_items},
+    {"maxItems",             &ValidatorImpl::validate_maxItems},
+    {"maxLength",            &ValidatorImpl::validate_maxLength},
+    {"maxProperties",        &ValidatorImpl::validate_maxProperties},
+    {"maximum",              &ValidatorImpl::validate_maximum},
+    {"minItems",             &ValidatorImpl::validate_minItems},
+    {"minLength",            &ValidatorImpl::validate_minLength},
+    {"minProperties",        &ValidatorImpl::validate_minProperties},
+    {"minimum",              &ValidatorImpl::validate_minimum},
+    {"multipleOf",           &ValidatorImpl::validate_multipleOf},
+    {"not",                  &ValidatorImpl::validate_not},
+    {"oneOf",                &ValidatorImpl::validate_oneOf},
+    {"pattern",              &ValidatorImpl::validate_pattern},
+    {"patternProperties",    &ValidatorImpl::validate_patternProperties},
+    {"properties",           &ValidatorImpl::validate_properties},
+    {"required",             &ValidatorImpl::validate_required},
+    {"type",                 &ValidatorImpl::validate_type},
+    {"uniqueItems",          &ValidatorImpl::validate_uniqueItems},
+  };
+
   bool result = true;
   assert(schema.is_object());
   for (auto &key : schema.object_items()) {
-    if (m_validators.find(key.first) != m_validators.end()) {
-      auto &validatorFunction = m_validators.at(key.first);
-      result = result & (this->*validatorFunction)(json, key.second, schema);
+    if (validatorFunctions.find(key.first) != validatorFunctions.end()) {
+      auto validatorFunction = std::bind(validatorFunctions.at(key.first), &*this, json, key.second, schema);
+      result = result & validatorFunction();
     }
   }
   return result;
@@ -432,8 +435,8 @@ bool ValidatorImpl::validate_type(const Json &json, const Json &type, const Json
     {"object",  &Json::is_object},
   };
   assert(checkers.find(typeString) != checkers.end());
-  auto &checker = checkers.at(typeString);
-  return (json.*checker)();
+  auto checker = std::bind(checkers.at(typeString), &json);
+  return checker();
 }
 
 bool ValidatorImpl::validate_uniqueItems(const Json &json, const Json &uniqueItems, const Json &)
