@@ -74,6 +74,10 @@ bool ValidatorImpl::findRef(const std::string &uri, Json &schema)
     return false;
   }
 
+  if (path.rfind("/") == path.length() - 1) {
+    return false;
+  }
+
   const Json *current = &m_schema;
 
   std::stringstream stream;
@@ -81,9 +85,6 @@ bool ValidatorImpl::findRef(const std::string &uri, Json &schema)
   std::string component;
 
   while (std::getline(stream, component, '/')) {
-    if (component.empty()) {
-      return false;
-    }
     if (current->object_items().find(component) == current->object_items().end()) {
       return false;
     }
@@ -101,11 +102,11 @@ bool ValidatorImpl::findRef(const std::string &uri, Json &schema)
 
 bool ValidatorImpl::validate_$ref(const Json &json, const Json &ref, const Json &)
 {
-  Json refSchema;
+  Json schema;
   assert(ref.is_string());
-  if (!findRef(ref.string_value(), refSchema))
+  if (!findRef(ref.string_value(), schema))
     return false;
-  return validate(json, refSchema);
+  return validate(json, schema);
 }
 
 bool ValidatorImpl::validate_additionalItems(const Json &json, const Json &additionalItems, const Json &schema)

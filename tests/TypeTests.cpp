@@ -79,7 +79,7 @@ TEST(Type, Integer)
   const std::string type = R"("integer")";
   const std::string schema = R"({"type": "integer"})";
   ASSERT_EQ(v.validate_type(_json_(json1), _json_(type), _json_(schema)), true);
-  ASSERT_EQ(v.validate_type(_json_(json2), _json_(type), _json_(schema)), true);
+  ASSERT_EQ(v.validate_type(_json_(json2), _json_(type), _json_(schema)), true); //TODO: should actually be false, requires json library changes
   ASSERT_EQ(v.validate_type(_json_(json3), _json_(type), _json_(schema)), false);
   ASSERT_EQ(v.validate_type(_json_(json4), _json_(type), _json_(schema)), false);
 }
