@@ -412,6 +412,7 @@ bool ValidatorImpl::validate_required(const Json &json, const Json &required, co
 bool ValidatorImpl::validate_type(const Json &json, const Json &type, const Json &schema)
 {
   if (type.is_array()) {
+    assert(!type.array_items().empty());
     for (auto &t : type.array_items()) {
       if (validate_type(json, t, schema))
         return true;

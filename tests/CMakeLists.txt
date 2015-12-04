@@ -24,6 +24,15 @@ set(TEST_FILES
     MinLengthTests.cpp
     MinPropertiesTests.cpp
     MinimumTests.cpp
+    MultipleOfTests.cpp
+    NotTests.cpp
+    OneOfTests.cpp
+    PatternTests.cpp
+    PatternPropertiesTests.cpp
+    PropertiesTests.cpp
+    RequiredTests.cpp
+    TypeTests.cpp
+    UniqueItemsTests.cpp
     )
 
 #foreach (FILE ${TEST_FILES})

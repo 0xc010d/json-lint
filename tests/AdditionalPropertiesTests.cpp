@@ -73,7 +73,7 @@ TEST(AdditionalProperties, DisallowedNoPropertiesFailure)
   "additionalProperties": false,
   "patternProperties":
   {
-    ".": {}
+    ".": {"enum": [1, 2, 3]}
   }
 }
 )";
@@ -102,7 +102,7 @@ TEST(AdditionalProperties, DisallowedNoPatternPropertiesFailure)
   const std::string schema = R"(
 {
   "additionalProperties": false,
-  "properties": {"p1": {}, "p2": {}, "p3": {}}
+  "properties": {"p1": {"enum": [1]}, "p2": {"enum": [2]}, "p3": {"enum": [3]}}
 }
 )";
   ASSERT_EQ(v.validate_additionalProperties(_json_(json), _json_(additionalProperties), _json_(schema)), false);
