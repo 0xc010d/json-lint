@@ -1,5 +1,4 @@
 #include "Validator.h"
-#include "ValidatorImpl.h"
 
 Validator::Validator(const json11::Json &schema) : m_impl(new ValidatorImpl(schema)) { }
 

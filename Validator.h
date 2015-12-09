@@ -2,6 +2,7 @@
 
 #include <json11.hpp>
 #include <memory>
+#include "ValidatorImpl.h"
 
 class ValidatorImpl;
 
