@@ -10,10 +10,8 @@ class Validator
 public:
   Validator(const json11::Json &schema);
 
-  ~Validator();
-
   bool validate(const json11::Json &json);
 
 private:
-  ValidatorImpl *m_impl;
+  std::unique_ptr<ValidatorImpl> m_impl;
 };

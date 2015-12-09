@@ -7,8 +7,3 @@ bool Validator::validate(const json11::Json &json)
 {
   return m_impl->validate(json);
 }
-
-Validator::~Validator()
-{
-  delete m_impl;
-}
