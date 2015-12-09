@@ -13,9 +13,8 @@ bool parseJsonFile(const char *fileName, Json &json) {
   std::stringstream stream;
   stream << file.rdbuf();
   std::string error;
-  std::string string = stream.str();
-  json = Json::parse(string, error);
-  return error.length() == 0;
+  json = Json::parse(stream.str(), error);
+  return error.empty();
 }
 
 int main(int argc, char **argv)
