@@ -1,7 +1,6 @@
 #include <sstream>
 #include <regex>
 #include <cmath>
-#include <assert.h>
 #include "ValidatorImpl.h"
 
 using namespace json11;
@@ -49,9 +48,9 @@ bool ValidatorImpl::validate(const Json &json, const Json &schema)
 
   bool result = true;
   assert(schema.is_object());
-  for (auto &key : schema.object_items()) {
+  for (const auto &key : schema.object_items()) {
     if (validatorFunctions.find(key.first) != validatorFunctions.end()) {
-      auto validatorFunction = std::bind(validatorFunctions.at(key.first), &*this, json, key.second, schema);
+      const auto &validatorFunction = std::bind(validatorFunctions.at(key.first), &*this, json, key.second, schema);
       result = result & validatorFunction();
     }
   }
@@ -88,7 +87,7 @@ bool ValidatorImpl::findRef(const std::string &uri, Json &schema)
     if (current->object_items().find(component) == current->object_items().end()) {
       return false;
     }
-    auto &newCurrent = current->object_items().at(component);
+    const auto &newCurrent = current->object_items().at(component);
     if (!newCurrent.is_object()) {
       return false;
     }
@@ -114,7 +113,7 @@ bool ValidatorImpl::validate_additionalItems(const Json &json, const Json &addit
   if (!json.is_array())
     return true;
   assert(schema.is_object());
-  auto &schemaObject = schema.object_items();
+  const auto &schemaObject = schema.object_items();
   if (schemaObject.find("items") == schemaObject.end())
     return true;
   if (schemaObject.at("items").is_object())
@@ -139,14 +138,14 @@ bool ValidatorImpl::validate_additionalProperties(const Json &json, const Json &
     return true;
 
   std::vector<std::string> keys;
-  for (auto &key : json.object_items())
+  for (const auto &key : json.object_items())
     keys.push_back(key.first);
   assert(schema.is_object());
-  auto &schemaObject = schema.object_items();
+  const auto &schemaObject = schema.object_items();
   if (schemaObject.find("properties") != schemaObject.end()) {
     assert(schemaObject.at("properties").is_object());
-    auto &properties = schemaObject.at("properties").object_items();
-    for (auto &property : properties)
+    const auto &properties = schemaObject.at("properties").object_items();
+    for (const auto &property : properties)
       keys.erase(
         std::remove(keys.begin(), keys.end(), property.first),
         keys.end()
@@ -154,11 +153,11 @@ bool ValidatorImpl::validate_additionalProperties(const Json &json, const Json &
   }
   if (schemaObject.find("patternProperties") != schemaObject.end()) {
     assert(schemaObject.at("patternProperties").is_object());
-    auto &patternProperties = schemaObject.at("patternProperties").object_items();
-    for (auto &patternProperty : patternProperties) {
+    const auto &patternProperties = schemaObject.at("patternProperties").object_items();
+    for (const auto &patternProperty : patternProperties) {
       std::regex regex(patternProperty.first);
       std::smatch match;
-      auto check = [&](const std::string &key) { return std::regex_match(key, match, regex); };
+      const auto &check = [&](const std::string &key) { return std::regex_match(key, match, regex); };
       keys.erase(
         std::remove_if(keys.begin(), keys.end(), check),
         keys.end()
@@ -174,7 +173,7 @@ bool ValidatorImpl::validate_allOf(const Json &json, const Json &allOf, const Js
   bool result = true;
   assert(allOf.is_array());
   assert(!allOf.array_items().empty());
-  for (auto &one : allOf.array_items()) {
+  for (const auto &one : allOf.array_items()) {
     result = result && validate(json, one);
   }
   return result;
@@ -184,7 +183,7 @@ bool ValidatorImpl::validate_anyOf(const Json &json, const Json &anyOf, const Js
 {
   assert(anyOf.is_array());
   assert(!anyOf.array_items().empty());
-  for (auto &one : anyOf.array_items()) {
+  for (const auto &one : anyOf.array_items()) {
     if (validate(json, one))
       return true;
   }
@@ -196,9 +195,9 @@ bool ValidatorImpl::validate_dependencies(const Json &json, const Json &dependen
   if (!json.is_object())
     return true;
   bool result = true;
-  auto &object = json.object_items();
+  const auto &object = json.object_items();
   assert(dependencies.is_object());
-  for (auto &dependency : dependencies.object_items()) {
+  for (const auto &dependency : dependencies.object_items()) {
     if (object.find(dependency.first) == object.end())
       continue;
     if (dependency.second.is_object()) {
@@ -207,7 +206,7 @@ bool ValidatorImpl::validate_dependencies(const Json &json, const Json &dependen
     else {
       assert(dependency.second.is_array());
       assert(!dependency.second.array_items().empty());
-      for (auto &key : dependency.second.array_items()) {
+      for (const auto &key : dependency.second.array_items()) {
         assert(key.is_string());
         result = result && object.find(key.string_value()) != object.end();
       }
@@ -220,7 +219,7 @@ bool ValidatorImpl::validate_enum(const Json &json, const Json &_enum, const Jso
 {
   assert(_enum.is_array());
   assert(!_enum.array_items().empty());
-  for (auto &item : _enum.array_items()) {
+  for (const auto &item : _enum.array_items()) {
     if (json == item)
       return true;
   }
@@ -232,20 +231,20 @@ bool ValidatorImpl::validate_items(const Json &json, const Json &items, const Js
   if (!json.is_array())
     return true;
   bool result = true;
-  auto &array = json.array_items();
+  const auto &array = json.array_items();
   if (items.is_object()) {
-    for (auto &value : array) {
+    for (const auto &value : array) {
       result = result && validate(value, items);
     }
   }
   else {
     assert(items.is_array());
-    auto &itemsArray = items.array_items();
+    const auto &itemsArray = items.array_items();
     if (itemsArray.size() < array.size()) {
       return false;
     }
     for (auto it = itemsArray.begin(); it < itemsArray.end(); ++it) {
-      auto index = std::distance(itemsArray.begin(), it);
+      const auto &index = std::distance(itemsArray.begin(), it);
       result = result && validate(array[index], *it);
     }
   }
@@ -281,7 +280,7 @@ bool ValidatorImpl::validate_maximum(const Json &json, const Json &maximum, cons
   if (!json.is_number())
     return true;
   assert(schema.is_object());
-  auto &schemaObject = schema.object_items();
+  const auto &schemaObject = schema.object_items();
   assert(json.is_number());
   if (schemaObject.find("exclusiveMaximum") == schemaObject.end() || !schemaObject.at("exclusiveMaximum").bool_value())
     return json <= maximum;
@@ -317,7 +316,7 @@ bool ValidatorImpl::validate_minimum(const Json &json, const Json &minimum, cons
   if (!json.is_number())
     return true;
   assert(schema.is_object());
-  auto &schemaObject = schema.object_items();
+  const auto &schemaObject = schema.object_items();
   assert(json.is_number());
   if (schemaObject.find("exclusiveMinimum") == schemaObject.end() || !schemaObject.at("exclusiveMinimum").bool_value())
     return json >= minimum;
@@ -342,7 +341,7 @@ bool ValidatorImpl::validate_oneOf(const Json &json, const Json &oneOf, const Js
 {
   int count = 0;
   assert(oneOf.is_array());
-  for (auto &one : oneOf.array_items()) {
+  for (const auto &one : oneOf.array_items()) {
     if (validate(json, one))
       count++;
   }
@@ -364,12 +363,12 @@ bool ValidatorImpl::validate_patternProperties(const Json &json, const Json &pat
   if (!json.is_object())
     return true;
   bool result = true;
-  auto &object = json.object_items();
+  const auto &object = json.object_items();
   assert(patternProperties.is_object());
-  for (auto &pattern : patternProperties.object_items()) {
+  for (const auto &pattern : patternProperties.object_items()) {
     std::regex regex(pattern.first);
     std::smatch match;
-    auto check = [&](const std::pair<std::string, Json> &value) { return std::regex_match(value.first, match, regex); };
+    const auto &check = [&](const std::pair<std::string, Json> &value) { return std::regex_match(value.first, match, regex); };
 
     auto iterator = std::find_if(object.begin(), object.end(), check);
     while (iterator != object.end()) {
@@ -385,12 +384,12 @@ bool ValidatorImpl::validate_properties(const Json &json, const Json &properties
   if (!json.is_object())
     return true;
   bool result = true;
-  auto &object = json.object_items();
+  const auto &object = json.object_items();
   assert(properties.is_object());
-  for (auto &property : properties.object_items()) {
+  for (const auto &property : properties.object_items()) {
     if (object.find(property.first) == object.end())
       continue;
-    auto &value = object.at(property.first);
+    const auto &value = object.at(property.first);
     result = result && validate(value, property.second);
   }
   return result;
@@ -401,9 +400,9 @@ bool ValidatorImpl::validate_required(const Json &json, const Json &required, co
   if (!json.is_object())
     return true;
   bool result = true;
-  auto &object = json.object_items();
+  const auto &object = json.object_items();
   assert(required.is_array());
-  for (auto &key : required.array_items()) {
+  for (const auto &key : required.array_items()) {
     assert(key.is_string());
     result = result && (object.find(key.string_value()) != object.end());
   }
@@ -414,14 +413,14 @@ bool ValidatorImpl::validate_type(const Json &json, const Json &type, const Json
 {
   if (type.is_array()) {
     assert(!type.array_items().empty());
-    for (auto &t : type.array_items()) {
+    for (const auto &t : type.array_items()) {
       if (validate_type(json, t, schema))
         return true;
     }
     return false;
   }
   assert(type.is_string());
-  auto &typeString = type.string_value();
+  const auto &typeString = type.string_value();
   if (typeString == "integer") {
     //there should be is_int method in Json. or Json::Type::INTEGER should be defined
     double integerPart;
@@ -437,7 +436,7 @@ bool ValidatorImpl::validate_type(const Json &json, const Json &type, const Json
     {"object",  &Json::is_object},
   };
   assert(checkers.find(typeString) != checkers.end());
-  auto checker = std::bind(checkers.at(typeString), &json);
+  const auto &checker = std::bind(checkers.at(typeString), &json);
   return checker();
 }
 
@@ -449,7 +448,7 @@ bool ValidatorImpl::validate_uniqueItems(const Json &json, const Json &uniqueIte
   if (!uniqueItems.bool_value())
     return true;
   std::vector<Json> values;
-  for (auto &item : json.array_items()) {
+  for (const auto &item : json.array_items()) {
     if (std::find(values.begin(), values.end(), item) != values.end())
       return false;
     values.push_back(item);
